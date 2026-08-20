@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>晖常语录</title>
+  <meta name="description" content="晖常语录：长期主义、价值投资与思想沉淀。">
+  <meta name="theme-color" content="#0c2644">
+  <link rel="stylesheet" href="styles.css?v=20260817-v8">
+</head>
+<body class="auth-pending">
+  <section class="auth-gate" id="authGate" aria-labelledby="authTitle">
+    <div class="auth-panel">
+      <div class="auth-mark" aria-hidden="true">晖</div>
+      <p class="auth-eyebrow">HUI’s Quotations</p>
+      <h1 id="authTitle">晖常语录</h1>
+      <p class="auth-intro">请输入访问密码后继续</p>
+      <form class="auth-form" id="authForm" novalidate>
+        <label class="auth-label" for="authPassword">访问密码</label>
+        <div class="auth-controls">
+          <input
+            id="authPassword"
+            name="password"
+            type="password"
+            inputmode="text"
+            autocomplete="current-password"
+            autocapitalize="off"
+            autocorrect="off"
+            spellcheck="false"
+            placeholder="请输入密码"
+            required
+          >
+          <button type="submit">进入</button>
+        </div>
+        <p class="auth-error" id="authError" role="alert" aria-live="polite"></p>
+      </form>
+      <p class="auth-note">验证成功后，当前设备 7 天内免登录</p>
+    </div>
+  </section>
+  <div id="app"></div>
+  <script src="auth.js?v=20260817-v8"></script>
+</body>
+</html>
