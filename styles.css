@@ -65,9 +65,8 @@ button{cursor:pointer}
 .home-meta{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));min-width:0;margin-top:11px;padding-top:10px;border-top:1px solid #eee8de}
 .home-meta .meta-chip{min-width:0;padding:1px 6px;font-weight:600;white-space:nowrap}
 .home-meta .meta-chip+.meta-chip{border-left:1px solid #e9e2d7}
-.home-update{position:relative;display:grid;grid-template-columns:42px minmax(0,1fr);align-items:center;gap:12px;margin-top:12px;padding:14px 15px;overflow:hidden;border:1px solid #e4dac9;border-radius:16px;background:linear-gradient(135deg,#fffdf9 0%,#f7f9fb 100%);box-shadow:0 6px 20px rgba(9,26,46,.06)}
+.home-update{position:relative;display:grid;grid-template-columns:minmax(0,1fr);align-items:center;gap:12px;margin-top:12px;padding:14px 15px;overflow:hidden;border:1px solid #e4dac9;border-radius:16px;background:linear-gradient(135deg,#fffdf9 0%,#f7f9fb 100%);box-shadow:0 6px 20px rgba(9,26,46,.06)}
 .home-update:after{content:"";position:absolute;z-index:0;right:-32px;top:-42px;width:112px;height:112px;border-radius:50%;background:radial-gradient(circle,rgba(201,164,106,.13),rgba(201,164,106,0) 70%);pointer-events:none}
-.home-update-mark{position:relative;z-index:1;display:grid;place-items:center;width:42px;height:42px;border:1px solid rgba(234,217,189,.22);border-radius:13px;background:linear-gradient(145deg,#0c2644,#285274);color:#ead6b5;font-family:Georgia,"Songti SC",serif;font-size:19px;line-height:1;box-shadow:0 7px 16px rgba(12,38,68,.16)}
 .home-update-content{position:relative;z-index:1;display:block;min-width:0}
 .home-update-head{display:flex;align-items:center;gap:8px;line-height:1}
 .home-update-badge{display:inline-flex;align-items:center;justify-content:center;height:20px;padding:0 8px;border:1px solid #dfc79e;border-radius:999px;background:#f5ead8;color:#8b642d;font-size:9px;font-weight:800;letter-spacing:.1em}
@@ -205,8 +204,7 @@ body.poster-open{overflow:hidden}
   .hero-motto{margin-top:10px;font-size:clamp(9px,2.55vw,10.5px);letter-spacing:.015em}
   .meta-chip{font-size:11px}
   .home-meta .meta-chip{padding:1px 3px}
-  .home-update{grid-template-columns:38px minmax(0,1fr);gap:10px;padding:12px}
-  .home-update-mark{width:38px;height:38px;border-radius:12px;font-size:17px}
+  .home-update{grid-template-columns:minmax(0,1fr);gap:10px;padding:12px}
   .home-update-badge{height:19px;padding:0 7px;font-size:8px}
   .home-update-label{font-size:10px}
   .home-update-text{margin-top:6px;font-size:13px;line-height:1.65}

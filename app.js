@@ -155,7 +155,7 @@ try{
   }
   function updateNoticeHtml(){
     var message=trim(M.updateNotice||'');
-    return message?'<section class="home-update" aria-label="最新内容更新"><span class="home-update-mark" aria-hidden="true">✦</span><span class="home-update-content"><span class="home-update-head"><span class="home-update-badge">NEW</span><span class="home-update-label">本期更新</span></span><span class="home-update-text">'+esc(message)+'</span></span></section>':'';
+    return message?'<section class="home-update" aria-label="最新内容更新"><span class="home-update-content"><span class="home-update-head"><span class="home-update-badge">NEW</span><span class="home-update-label">本期更新</span></span><span class="home-update-text">'+esc(message)+'</span></span></section>':'';
   }
 
   function homeView(){
