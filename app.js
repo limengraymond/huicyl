@@ -71,8 +71,6 @@ try{
     return parts.join('\n\n');
   }
   function formatNumber(value){return String(Number(value)||0).replace(/\B(?=(\d{3})+(?!\d))/g,',');}
-  function totalTextCount(){var total=0;for(var i=0;i<Q.length;i++)total+=quoteText(Q[i]).replace(/\s/g,'').length;return total;}
-  function totalTextLabel(){var total=totalTextCount();return total>=10000?'近'+Math.max(1,Math.round(total/10000))+'万字':formatNumber(total)+' 字';}
   function quoteUpdatedValue(q){
     var values=[q&&q.updatedTime,q&&q.createdTime];
     for(var i=0;i<values.length;i++){var parsed=Date.parse(values[i]||'');if(!isNaN(parsed))return parsed;}
@@ -146,11 +144,19 @@ try{
     var attrs=hasBody?' type="button" onclick="location.hash=\'article/'+esc(a.id)+'\'"':url?' href="'+esc(url)+'" target="_blank" rel="noopener noreferrer"':'';
     var account=trim(a.account)?'<span>'+esc(a.account)+'</span>':'';
     var subtitle=trim(a.subtitle)?'<p class="article-card-subtitle">'+esc(a.subtitle)+'</p>':'';
-    return'<'+tag+' class="article-card"'+attrs+'><h3>'+esc(a.title)+'</h3>'+subtitle+'<div class="article-meta">'+account+'<span>收录时间：'+esc(articleCollectedLabel(a))+'</span></div></'+tag+'>';
+    var greeting=a.isNewYearGreeting?'<span class="article-greeting-badge">新春寄语</span>':'';
+    return'<'+tag+' class="article-card"'+attrs+'><div class="article-title-row"><h3>'+esc(a.title)+'</h3>'+greeting+'</div>'+subtitle+'<div class="article-meta">'+account+'<span>收录时间：'+esc(articleCollectedLabel(a))+'</span></div></'+tag+'>';
   }
   function searchForm(v){return'<form class="searchbox" onsubmit="goSearch(event)"><input id="searchInput" value="'+esc(v||'')+'" placeholder="搜索语录标题、正文或出处"><button class="btn-primary">搜索</button></form>';}
   function bottomNav(active){return'<nav class="bottomnav"><button '+(active==='home'?'class="active"':'')+' onclick="location.hash=\'\'"><span>首页</span></button><button '+(active==='sources'?'class="active"':'')+' onclick="location.hash=\'sources\'"><span>按出处分类</span></button><button '+(active==='articles'?'class="active"':'')+' onclick="location.hash=\'articles\'"><span>已收录文章</span></button></nav>';}
-  function topbar(title){return'<header class="topbar"><button class="iconbtn" onclick="goBack()">返回</button><div class="topbar-title">'+esc(title)+'</div><button class="iconbtn" onclick="openDrawer()">主题</button></header>';}
+  function topbar(title,actionLabel,actionHash){
+    var action=actionLabel?'<button class="topbar-action" onclick="location.hash=\''+esc(actionHash||'')+'\'">'+esc(actionLabel)+'</button>':'<button class="iconbtn" onclick="openDrawer()">主题</button>';
+    return'<header class="topbar"><button class="iconbtn" onclick="goBack()">返回</button><div class="topbar-title">'+esc(title)+'</div>'+action+'</header>';
+  }
+  function updateNoticeHtml(){
+    var message=trim(M.updateNotice||'');
+    return message?'<section class="home-update" aria-label="最新内容更新"><span class="home-update-mark" aria-hidden="true">✦</span><span class="home-update-content"><span class="home-update-head"><span class="home-update-badge">NEW</span><span class="home-update-label">本期更新</span></span><span class="home-update-text">'+esc(message)+'</span></span></section>':'';
+  }
 
   function homeView(){
     pageTitle('');
@@ -160,7 +166,7 @@ try{
     for(i=0;i<Q.length;i++)if(Q[i].highlighted)latest.push(Q[i]);
     latest.sort(function(a,b){var la=Number(a.latestOrder)||0,lb=Number(b.latestOrder)||0;if(la||lb)return lb-la;return quoteUpdatedValue(b)-quoteUpdatedValue(a)||(Number(b.order)||0)-(Number(a.order)||0);});
     for(i=0;i<latest.length;i++)latestHtml+=quoteCard(latest[i],'',true);
-    return'<main class="shell"><section class="hero"><div class="hero-portrait"><img src="portrait.png" alt="人物照片"></div><div class="hero-copy"><h1 class="hero-title"><span class="hero-calligraphy">晖</span><span>常语录</span></h1><p class="hero-motto">简单专注 · 内心宁静 · 积极向上</p></div></section><div class="search-panel">'+searchForm(state.query||'')+'<div class="home-meta" aria-label="内容统计"><span class="meta-chip">'+formatNumber(Q.length)+' 条语录</span><span class="meta-chip">'+formatNumber(M.categories.length)+' 个主题</span><span class="meta-chip">'+totalTextLabel()+'</span></div></div><section class="section"><div class="section-head"><h2>主题目录</h2><div class="sub">点击进入</div></div><div class="categories">'+categories+'</div></section><section class="section"><div class="section-head"><h2>最新收录</h2><div class="sub">'+latest.length+' 条 · 按更新时间排序</div></div><div class="quote-list">'+latestHtml+'</div></section></main>'+bottomNav('home');
+    return'<main class="shell"><section class="hero"><div class="hero-portrait"><img src="portrait.png" alt="人物照片"></div><div class="hero-copy"><h1 class="hero-title"><span class="hero-calligraphy">晖</span><span>常语录</span></h1><p class="hero-motto">简单专注 · 内心宁静 · 积极向上</p></div></section><div class="search-panel">'+searchForm(state.query||'')+'<div class="home-meta" aria-label="内容统计"><span class="meta-chip">'+formatNumber(Q.length)+' 条语录</span><span class="meta-chip">'+formatNumber(M.categories.length)+' 个主题</span><span class="meta-chip">'+formatNumber(A.length)+' 篇文章</span></div></div>'+updateNoticeHtml()+'<section class="section"><div class="section-head"><h2>主题目录</h2><div class="sub">点击进入</div></div><div class="categories">'+categories+'</div></section><section class="section"><div class="section-head"><h2>最新收录</h2><div class="sub">'+latest.length+' 条 · 按更新时间排序</div></div><div class="quote-list">'+latestHtml+'</div></section></main>'+bottomNav('home');
   }
   function categoryView(){
     pageTitle(state.cat);
@@ -206,11 +212,15 @@ try{
     for(var i=0;i<q.blocks.length;i++){var b=q.blocks[i];if(!b.text)continue;blocks+='<section class="bodyblock"><p>'+esc(b.text)+'</p>'+blockSource(b)+'</section>';}
     return'<main class="shell">'+topbar(q.title)+'<article class="detail"><div class="crumb">'+esc(q.category)+'</div><h1>'+esc(q.title)+'</h1>'+blocks+'<div class="actions"><button class="btn-primary" onclick="copyQuote(\''+q.id+'\')">复制文字</button><button class="btn-ghost" onclick="makePoster(\''+q.id+'\')">生成分享图</button></div><div class="pager"><button class="btn-light" '+(index<=0?'disabled':'')+' onclick="location.hash=\'quote/'+Q[Math.max(0,index-1)].id+'\'">上一篇</button><button class="btn-light" '+(index>=Q.length-1?'disabled':'')+' onclick="location.hash=\'quote/'+Q[Math.min(Q.length-1,index+1)].id+'\'">下一篇</button></div></article></main>'+bottomNav('home');
   }
-  function articlesView(){
-    pageTitle('已收录文章');var list=A.slice();
+  function articlesView(newYearOnly){
+    var isCollection=!!newYearOnly,title=isCollection?'新春寄语合集':'已收录文章';
+    pageTitle(title);var list=isCollection?A.filter(function(a){return!!a.isNewYearGreeting;}):A.slice();
     list.sort(function(a,b){var da=articleCollectedValue(a),db=articleCollectedValue(b);if(da!==null&&db!==null)return db-da;if(db!==null)return 1;if(da!==null)return-1;return 0;});
     var html='';for(var i=0;i<list.length;i++)html+=articleCard(list[i]);
-    return'<main class="shell">'+topbar('已收录文章')+'<section class="section"><div class="section-head"><h2>已收录文章</h2><div class="sub">'+list.length+' 篇 · 按收录时间从新到旧</div></div><div class="article-list">'+html+'</div></section></main>'+bottomNav('articles');
+    if(!html)html='<div class="empty">暂未标记新春寄语<br>可在后台文章管理中进行标记</div>';
+    var actionLabel=isCollection?'全部文章':'新春寄语合集',actionHash=isCollection?'articles':'articles/new-year';
+    var subtitle=isCollection?list.length+' 篇 · 历年新春寄语':list.length+' 篇 · 按收录时间从新到旧';
+    return'<main class="shell">'+topbar(title,actionLabel,actionHash)+'<section class="section"><div class="section-head"><h2>'+esc(title)+'</h2><div class="sub">'+subtitle+'</div></div><div class="article-list">'+html+'</div></section></main>'+bottomNav('articles');
   }
   function articleDetailView(){
     var found=findArticle(state.id),a=found&&found.item;if(!a)return articlesView();
@@ -220,14 +230,14 @@ try{
     var account=trim(a.account)?'<span>'+esc(a.account)+'</span>':'';
     var url=safeUrl(a.url),hasBody=paragraphs.length>0,shareBtn=(!url&&hasBody)?'<button class="btn-primary" onclick="makeArticlePoster(\''+a.id+'\')">生成长图</button>':'';
     var link=url?'<div class="article-detail-actions"><a class="btn-ghost" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">查看原文 ↗</a></div>':(shareBtn?'<div class="article-detail-actions">'+shareBtn+'</div>':'');
-    return'<main class="shell">'+topbar('文章全文')+'<article class="article-detail"><div class="article-kicker">已收录文章</div><h1>'+esc(a.title)+'</h1>'+subtitle+'<div class="article-detail-meta">'+account+'<span>收录时间：'+esc(articleCollectedLabel(a))+'</span></div><div class="article-body">'+body+'</div>'+link+'</article></main>'+bottomNav('articles');
+    return'<main class="shell">'+topbar('文章全文')+'<article class="article-detail"><div class="article-kicker">'+(a.isNewYearGreeting?'新春寄语合集':'已收录文章')+'</div><h1>'+esc(a.title)+'</h1>'+subtitle+'<div class="article-detail-meta">'+account+'<span>收录时间：'+esc(articleCollectedLabel(a))+'</span></div><div class="article-body">'+body+'</div>'+link+'</article></main>'+bottomNav('articles');
   }
   function drawer(){
     var html='';for(var i=0;i<M.categories.length;i++){var c=M.categories[i];html+='<button class="cat" onclick="location.hash=\'category/'+encodeURIComponent(c.name)+'\';closeDrawer()"><b>'+esc(c.name)+'</b><span>'+esc(c.count)+' 条语录</span></button>';}
     return'<div class="drawer" onclick="drawerBackdrop(event)"><aside class="drawer-panel"><div class="drawer-head"><h3>主题目录</h3><button class="btn-ghost" onclick="closeDrawer()">关闭</button></div><div class="categories">'+html+'</div></aside></div>';
   }
-  function render(){var html=state.view==='category'?categoryView():state.view==='search'?searchView():state.view==='detail'?detailView():state.view==='sources'?sourcesView():state.view==='source'?sourceView():state.view==='article'?articleDetailView():state.view==='articles'?articlesView():homeView();app.innerHTML=html+(state.drawer?drawer():'');}
-  function route(){var h=location.hash.replace(/^#/,'');state.drawer=false;if(h.indexOf('quote/')===0){state.view='detail';state.id=h.split('/')[1]||'';}else if(h.indexOf('article/')===0){state.view='article';state.id=decodeURIComponent(h.substring(8));}else if(h.indexOf('category/')===0){state.view='category';state.cat=decodeURIComponent(h.substring(9));}else if(h.indexOf('source/')===0){state.view='source';state.source=decodeURIComponent(h.substring(7));}else if(h.indexOf('sources')===0){state.view='sources';state.year=decodeURIComponent(h.split('/')[1]||'');}else if(h.indexOf('search')===0){state.view='search';state.query=decodeURIComponent((h.split('?q=')[1]||''));}else if(h==='articles')state.view='articles';else{state.view='home';state.query='';}render();window.scrollTo(0,0);}
+  function render(){var html=state.view==='category'?categoryView():state.view==='search'?searchView():state.view==='detail'?detailView():state.view==='sources'?sourcesView():state.view==='source'?sourceView():state.view==='article'?articleDetailView():state.view==='newyear'?articlesView(true):state.view==='articles'?articlesView(false):homeView();app.innerHTML=html+(state.drawer?drawer():'');}
+  function route(){var h=location.hash.replace(/^#/,'');state.drawer=false;if(h.indexOf('quote/')===0){state.view='detail';state.id=h.split('/')[1]||'';}else if(h.indexOf('article/')===0){state.view='article';state.id=decodeURIComponent(h.substring(8));}else if(h.indexOf('category/')===0){state.view='category';state.cat=decodeURIComponent(h.substring(9));}else if(h.indexOf('source/')===0){state.view='source';state.source=decodeURIComponent(h.substring(7));}else if(h.indexOf('sources')===0){state.view='sources';state.year=decodeURIComponent(h.split('/')[1]||'');}else if(h.indexOf('search')===0){state.view='search';state.query=decodeURIComponent((h.split('?q=')[1]||''));}else if(h==='articles/new-year')state.view='newyear';else if(h==='articles')state.view='articles';else{state.view='home';state.query='';}render();window.scrollTo(0,0);}
   window.goSearch=function(e){if(e)e.preventDefault();var val=document.getElementById('searchInput')?document.getElementById('searchInput').value:'';location.hash='search?q='+encodeURIComponent(trim(val));};
   window.openDrawer=function(){state.drawer=true;render();};window.closeDrawer=function(){state.drawer=false;render();};window.drawerBackdrop=function(e){if(e.target&&String(e.target.className).indexOf('drawer')>=0)closeDrawer();};
   window.goBack=function(){if(history.length>1)history.back();else location.hash='';};
