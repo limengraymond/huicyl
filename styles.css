@@ -149,6 +149,7 @@ button{cursor:pointer}
 .article-kicker{margin-bottom:8px;color:#a07945;font-size:12px;font-weight:700;letter-spacing:.12em}
 .article-detail h1{margin:0;font-family:Georgia,"Times New Roman","Songti SC","SimSun",serif;font-size:32px;line-height:1.35;overflow-wrap:anywhere;word-break:break-word}
 .article-subtitle{margin:9px 0 0;color:#536277;font-size:16px;line-height:1.6}
+.article-card-subtitle{margin:2px 0 8px;color:var(--muted);font-size:13px;line-height:1.5;overflow-wrap:anywhere}
 .article-detail-meta{display:flex;flex-wrap:wrap;gap:7px 14px;margin:14px 0 18px;padding-bottom:15px;border-bottom:1px solid var(--border);color:var(--muted);font-size:13px}
 .article-body{padding:22px 20px;background:var(--card);border:1px solid var(--border);border-radius:18px;box-shadow:0 3px 14px rgba(9,26,46,.04)}
 .article-body p{margin:0 0 1.05em;color:#253b54;font-size:16px;line-height:1.92;text-align:justify;overflow-wrap:anywhere;word-break:break-word}

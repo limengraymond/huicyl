@@ -145,11 +145,11 @@ try{
     var paragraphs=articleParagraphs(a),hasBody=paragraphs.length>0,url=safeUrl(a.url),tag=hasBody?'button':url?'a':'div';
     var attrs=hasBody?' type="button" onclick="location.hash=\'article/'+esc(a.id)+'\'"':url?' href="'+esc(url)+'" target="_blank" rel="noopener noreferrer"':'';
     var account=trim(a.account)?'<span>'+esc(a.account)+'</span>':'';
-    var action=hasBody?'阅读全文 ›':url?'查看原文 ↗':'全文待补';
-    return'<'+tag+' class="article-card"'+attrs+'><h3>'+esc(a.title)+'</h3><div class="article-meta">'+account+'<span>收录时间：'+esc(articleCollectedLabel(a))+'</span></div><div class="article-action">'+action+'</div></'+tag+'>';
+    var subtitle=trim(a.subtitle)?'<p class="article-card-subtitle">'+esc(a.subtitle)+'</p>':'';
+    return'<'+tag+' class="article-card"'+attrs+'><h3>'+esc(a.title)+'</h3>'+subtitle+'<div class="article-meta">'+account+'<span>收录时间：'+esc(articleCollectedLabel(a))+'</span></div></'+tag+'>';
   }
   function searchForm(v){return'<form class="searchbox" onsubmit="goSearch(event)"><input id="searchInput" value="'+esc(v||'')+'" placeholder="搜索语录标题、正文或出处"><button class="btn-primary">搜索</button></form>';}
-  function bottomNav(active){return'<nav class="bottomnav"><button '+(active==='home'?'class="active"':'')+' onclick="location.hash=\'\'"><span>首页</span></button><button '+(active==='sources'?'class="active"':'')+' onclick="location.hash=\'sources\'"><span>按出处分类</span></button><button '+(active==='articles'?'class="active"':'')+' onclick="location.hash=\'articles\'"><span>近期文章</span></button></nav>';}
+  function bottomNav(active){return'<nav class="bottomnav"><button '+(active==='home'?'class="active"':'')+' onclick="location.hash=\'\'"><span>首页</span></button><button '+(active==='sources'?'class="active"':'')+' onclick="location.hash=\'sources\'"><span>按出处分类</span></button><button '+(active==='articles'?'class="active"':'')+' onclick="location.hash=\'articles\'"><span>已收录文章</span></button></nav>';}
   function topbar(title){return'<header class="topbar"><button class="iconbtn" onclick="goBack()">返回</button><div class="topbar-title">'+esc(title)+'</div><button class="iconbtn" onclick="openDrawer()">主题</button></header>';}
 
   function homeView(){
@@ -207,10 +207,10 @@ try{
     return'<main class="shell">'+topbar(q.title)+'<article class="detail"><div class="crumb">'+esc(q.category)+'</div><h1>'+esc(q.title)+'</h1>'+blocks+'<div class="actions"><button class="btn-primary" onclick="copyQuote(\''+q.id+'\')">复制文字</button><button class="btn-ghost" onclick="makePoster(\''+q.id+'\')">生成分享图</button></div><div class="pager"><button class="btn-light" '+(index<=0?'disabled':'')+' onclick="location.hash=\'quote/'+Q[Math.max(0,index-1)].id+'\'">上一篇</button><button class="btn-light" '+(index>=Q.length-1?'disabled':'')+' onclick="location.hash=\'quote/'+Q[Math.min(Q.length-1,index+1)].id+'\'">下一篇</button></div></article></main>'+bottomNav('home');
   }
   function articlesView(){
-    pageTitle('近期文章');var list=A.slice();
+    pageTitle('已收录文章');var list=A.slice();
     list.sort(function(a,b){var da=articleCollectedValue(a),db=articleCollectedValue(b);if(da!==null&&db!==null)return db-da;if(db!==null)return 1;if(da!==null)return-1;return 0;});
     var html='';for(var i=0;i<list.length;i++)html+=articleCard(list[i]);
-    return'<main class="shell">'+topbar('近期文章')+'<section class="section"><div class="section-head"><h2>已收录文章</h2><div class="sub">'+list.length+' 篇 · 按收录时间从新到旧</div></div><div class="article-list">'+html+'</div></section></main>'+bottomNav('articles');
+    return'<main class="shell">'+topbar('已收录文章')+'<section class="section"><div class="section-head"><h2>已收录文章</h2><div class="sub">'+list.length+' 篇 · 按收录时间从新到旧</div></div><div class="article-list">'+html+'</div></section></main>'+bottomNav('articles');
   }
   function articleDetailView(){
     var found=findArticle(state.id),a=found&&found.item;if(!a)return articlesView();
@@ -220,7 +220,7 @@ try{
     var account=trim(a.account)?'<span>'+esc(a.account)+'</span>':'';
     var url=safeUrl(a.url),hasBody=paragraphs.length>0,shareBtn=(!url&&hasBody)?'<button class="btn-primary" onclick="makeArticlePoster(\''+a.id+'\')">生成长图</button>':'';
     var link=url?'<div class="article-detail-actions"><a class="btn-ghost" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">查看原文 ↗</a></div>':(shareBtn?'<div class="article-detail-actions">'+shareBtn+'</div>':'');
-    return'<main class="shell">'+topbar('文章全文')+'<article class="article-detail"><div class="article-kicker">近期文章</div><h1>'+esc(a.title)+'</h1>'+subtitle+'<div class="article-detail-meta">'+account+'<span>收录时间：'+esc(articleCollectedLabel(a))+'</span></div><div class="article-body">'+body+'</div>'+link+'</article></main>'+bottomNav('articles');
+    return'<main class="shell">'+topbar('文章全文')+'<article class="article-detail"><div class="article-kicker">已收录文章</div><h1>'+esc(a.title)+'</h1>'+subtitle+'<div class="article-detail-meta">'+account+'<span>收录时间：'+esc(articleCollectedLabel(a))+'</span></div><div class="article-body">'+body+'</div>'+link+'</article></main>'+bottomNav('articles');
   }
   function drawer(){
     var html='';for(var i=0;i<M.categories.length;i++){var c=M.categories[i];html+='<button class="cat" onclick="location.hash=\'category/'+encodeURIComponent(c.name)+'\';closeDrawer()"><b>'+esc(c.name)+'</b><span>'+esc(c.count)+' 条语录</span></button>';}
