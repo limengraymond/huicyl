@@ -133,6 +133,12 @@ button{cursor:pointer}
 .source-summary-hero span{color:var(--gold-soft);font-size:12px;font-weight:700;letter-spacing:.08em}
 .source-summary-hero h1{margin:7px 0 8px;font-size:24px;line-height:1.42;overflow-wrap:anywhere;word-break:break-word}
 .source-summary-hero p{margin:0;color:rgba(255,255,255,.72);font-size:13px}
+.hero-meta-row{display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:24px}
+.hero-origin-link{flex:0 0 auto;padding:4px 11px;border:1px solid rgba(234,217,189,.45);border-radius:999px;color:var(--gold-soft);font-size:12px;font-weight:700;letter-spacing:.02em;text-decoration:none;white-space:nowrap;transition:background .2s,border-color .2s,color .2s}
+.hero-origin-link:hover,.hero-origin-link:focus{background:var(--gold-soft);border-color:var(--gold-soft);color:#12263f}
+.hero-origin-link:focus-visible{outline:2px solid rgba(234,217,189,.7);outline-offset:3px}
+.source-link-action{text-decoration:none}
+.source-link-action:hover,.source-link-action:focus{color:#7d5322}
 .text-link{color:#9a7545;border-bottom:1px solid rgba(154,117,69,.35)}
 .actions,.pager{display:flex;gap:10px;margin:18px 0}
 .actions button,.pager button{flex:1}
@@ -222,6 +228,7 @@ body.poster-open{overflow:hidden}
   .source-card-count{align-self:flex-end}
   .source-summary-hero{padding:18px 15px}
   .source-summary-hero h1{font-size:21px}
+  .hero-meta-row{flex-wrap:wrap;gap:8px 12px}
   .detail h1{font-size:28px}
   .poster-modal{padding:10px}
   .poster-dialog{border-radius:18px}

@@ -81,10 +81,30 @@ try{
     var text=trim(value);if(!text)return'';
     try{var url=new URL(text);return url.protocol==='http:'||url.protocol==='https:'?url.href:'';}catch(e){return'';}
   }
+  function articleLinkHtml(id,label,cls){
+    var found=findArticle(id);if(!found)return'';
+    var a=found.item,hasBody=articleParagraphs(a).length>0,url=safeUrl(a.url);
+    var text=label||(hasBody?'查看原文':'查看原文 ↗'),klass=trim(cls)||'source-link-action';
+    if(hasBody)return'<a class="'+esc(klass)+'" href="#article/'+esc(a.id)+'">'+esc(text)+'</a>';
+    if(url)return'<a class="'+esc(klass)+'" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">'+esc(text)+'</a>';
+    return'';
+  }
+  function sourceArticleId(source){
+    var list=quotesBySource(source);
+    for(var i=0;i<list.length;i++){
+      var bs=list[i].blocks||[];
+      for(var j=0;j<bs.length;j++){
+        if(trim(bs[j]&&bs[j].source)===source&&bs[j].articleId)return bs[j].articleId;
+      }
+    }
+    return'';
+  }
   function blockSource(block){
-    var source=trim(block&&block.source),url=safeUrl(block&&block.sourceUrl),label=source||'原文链接';
+    var source=trim(block&&block.source),label=source||'原文链接';
     var summary=source?'<a class="source-summary-link" href="#source/'+esc(sourceKey(source))+'">出处：'+esc(label)+'</a>':'<span>原文链接</span>';
-    if(url)return'<div class="source source-link">'+summary+'<a class="source-link-action" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">查看原文 ↗</a></div>';
+    var link=articleLinkHtml(block&&block.articleId),url=safeUrl(block&&block.sourceUrl);
+    if(!link&&url)link='<a class="source-link-action" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">查看原文 ↗</a>';
+    if(link)return'<div class="source source-link">'+summary+link+'</div>';
     return source?'<div class="source">'+summary+'</div>':'';
   }
   function articleDateValue(value){
@@ -197,7 +217,8 @@ try{
     for(i=0;i<list.length;i++)html+=quoteCard(list[i],'',true);
     if(!html)html='<div class="empty">没有找到这个出处对应的语录<br><a class="text-link" href="#sources">返回按出处分类</a></div>';
     var year=item&&item.year?item.year+' 年':'年份待补';
-    return'<main class="shell">'+topbar('出处汇总')+'<section class="source-summary-hero"><span>'+esc(year)+' · 出处汇总</span><h1>'+esc(source||'未知出处')+'</h1><p>共收录 '+list.length+' 条相关语录</p></section><section class="section"><div class="quote-list">'+html+'</div></section></main>'+bottomNav('sources');
+    var originLink=articleLinkHtml(sourceArticleId(source),'','hero-origin-link');
+    return'<main class="shell">'+topbar('出处汇总')+'<section class="source-summary-hero"><span>'+esc(year)+' · 出处汇总</span><h1>'+esc(source||'未知出处')+'</h1><p class="hero-meta-row">共收录 '+list.length+' 条相关语录'+originLink+'</p></section><section class="section"><div class="quote-list">'+html+'</div></section></main>'+bottomNav('sources');
   }
   function searchView(){
     pageTitle('搜索');
