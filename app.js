@@ -8,12 +8,17 @@ try{
   var state={view:'home',cat:'',id:'',query:'',year:'',source:'',drawer:false};
 
   function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];});}
+  function stripTags(s){return String(s==null?'':s).replace(/<\/?\s*(?:b|strong)\s*>/gi,'');}
+  function escapeRich(s){
+    return String(s==null?'':s).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];})
+      .replace(/&lt;\s*(\/?)\s*(?:b|strong)\s*&gt;/gi,'<$1b>');
+  }
   function trim(s){return String(s||'').replace(/^\s+|\s+$/g,'');}
   function findQuote(id){for(var i=0;i<Q.length;i++)if(Q[i].id===id)return{item:Q[i],index:i};return null;}
   function findArticle(id){for(var i=0;i<A.length;i++)if(A[i].id===id)return{item:A[i],index:i};return null;}
   function byCategory(name){var out=[];for(var i=0;i<Q.length;i++)if(Q[i].category===name)out.push(Q[i]);return out;}
   function pageTitle(t){document.title=t?(t+'｜晖常语录'):'晖常语录';}
-  function excerpt(text,max){text=String(text||'').replace(/\s+/g,' ');return text.length<=max?text:text.slice(0,max-1)+'…';}
+  function excerpt(text,max){text=stripTags(text).replace(/\s+/g,' ');return text.length<=max?text:text.slice(0,max-1)+'…';}
   function sourceYearValue(block){
     var source=trim(block&&block.source),value=Number(block&&block.sourceYear||SOURCE_YEARS[source]||0);
     return isFinite(value)&&value>0?value:0;
@@ -65,9 +70,9 @@ try{
   }
   function sourceKey(source){return encodeURIComponent(source).replace(/'/g,'%27');}
   function quoteText(q){
-    var content=trim(q&&q.content);if(content)return content;
+    var content=stripTags(trim(q&&q.content));if(content)return content;
     var blocks=q&&q.blocks||[],parts=[];
-    for(var i=0;i<blocks.length;i++)if(trim(blocks[i]&&blocks[i].text))parts.push(trim(blocks[i].text));
+    for(var i=0;i<blocks.length;i++)if(trim(blocks[i]&&blocks[i].text))parts.push(stripTags(trim(blocks[i].text)));
     return parts.join('\n\n');
   }
   function formatNumber(value){return String(Number(value)||0).replace(/\B(?=(\d{3})+(?!\d))/g,',');}
@@ -128,12 +133,12 @@ try{
     return Array.isArray(paragraphs)?paragraphs.map(function(item){return trim(typeof item==='string'?item:item&&item.text);}).filter(Boolean):[];
   }
   function articleParagraphHtml(text){
-    var match=String(text||'').match(/^((?:第一|第二|第三|第四|第五)[，、][^。！？]*[。！？])/);
-    if(match)return'<p><strong>'+esc(match[1])+'</strong>'+esc(String(text).slice(match[1].length))+'</p>';
-    return'<p>'+esc(text)+'</p>';
+    var raw=String(text||''),hasBold=/<\/?\s*(?:b|strong)\s*>/i.test(raw),match=stripTags(raw).match(/^((?:第一|第二|第三|第四|第五)[，、][^。！？]*[。！？])/);
+    if(match&&!hasBold)return'<p><strong>'+esc(match[1])+'</strong>'+escapeRich(raw.slice(match[1].length))+'</p>';
+    return'<p>'+escapeRich(raw)+'</p>';
   }
   function hi(s,q){
-    s=esc(s);q=trim(q);if(!q)return s;
+    s=esc(stripTags(s));q=trim(q);if(!q)return s;
     var keys=q.split(/\s+/).filter(Boolean);
     for(var i=0;i<keys.length;i++){var e=keys[i].replace(/[.*+?^${}()|[\]\\]/g,'\\$&');s=s.replace(new RegExp(e,'gi'),function(m){return'<mark>'+m+'</mark>';});}
     return s;
@@ -142,7 +147,7 @@ try{
     var term=trim(query).toLowerCase();if(!term)return[];
     var keys=term.split(/\s+/).filter(Boolean),result=[];
     for(var i=0;i<Q.length;i++){
-      var q=Q[i],title=(q.title||'').toLowerCase(),body=(q.content||'').toLowerCase(),src=(q.sources||[]).join(' ').toLowerCase(),ok=true,score=0;
+      var q=Q[i],title=stripTags(q.title||'').toLowerCase(),body=stripTags(q.content||'').toLowerCase(),src=stripTags((q.sources||[]).join(' ')).toLowerCase(),ok=true,score=0;
       for(var j=0;j<keys.length;j++){var k=keys[j];if(title.indexOf(k)<0&&body.indexOf(k)<0&&src.indexOf(k)<0){ok=false;break;}if(title.indexOf(k)>=0)score+=5;if(body.indexOf(k)>=0)score+=2;if(src.indexOf(k)>=0)score+=1;}
       if(ok)result.push({q:q,score:score});
     }
@@ -230,7 +235,7 @@ try{
     var found=findQuote(state.id);if(!found)return homeView();
     var q=found.item,index=found.index,blocks='';
     pageTitle(q.title);
-    for(var i=0;i<q.blocks.length;i++){var b=q.blocks[i];if(!b.text)continue;blocks+='<section class="bodyblock"><p>'+esc(b.text)+'</p>'+blockSource(b)+'</section>';}
+    for(var i=0;i<q.blocks.length;i++){var b=q.blocks[i];if(!b.text)continue;blocks+='<section class="bodyblock"><p>'+escapeRich(b.text)+'</p>'+blockSource(b)+'</section>';}
     return'<main class="shell">'+topbar(q.title)+'<article class="detail"><div class="crumb">'+esc(q.category)+'</div><h1>'+esc(q.title)+'</h1>'+blocks+'<div class="actions"><button class="btn-primary" onclick="copyQuote(\''+q.id+'\')">复制文字</button><button class="btn-ghost" onclick="makePoster(\''+q.id+'\')">生成分享图</button></div><div class="pager"><button class="btn-light" '+(index<=0?'disabled':'')+' onclick="location.hash=\'quote/'+Q[Math.max(0,index-1)].id+'\'">上一篇</button><button class="btn-light" '+(index>=Q.length-1?'disabled':'')+' onclick="location.hash=\'quote/'+Q[Math.min(Q.length-1,index+1)].id+'\'">下一篇</button></div></article></main>'+bottomNav('home');
   }
   function articlesView(newYearOnly){
@@ -262,7 +267,7 @@ try{
   window.goSearch=function(e){if(e)e.preventDefault();var val=document.getElementById('searchInput')?document.getElementById('searchInput').value:'';location.hash='search?q='+encodeURIComponent(trim(val));};
   window.openDrawer=function(){state.drawer=true;render();};window.closeDrawer=function(){state.drawer=false;render();};window.drawerBackdrop=function(e){if(e.target&&String(e.target.className).indexOf('drawer')>=0)closeDrawer();};
   window.goBack=function(){if(history.length>1)history.back();else location.hash='';};
-  window.copyQuote=function(id){var found=findQuote(id),q=found&&found.item;if(!q)return;var text='【'+q.title+'】\n';for(var i=0;i<q.blocks.length;i++){if(!q.blocks[i].text)continue;text+=q.blocks[i].text;if(q.blocks[i].source)text+='\n（'+q.blocks[i].source+'）';text+='\n\n';}text+='——晖常语录';if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(function(){alert('已复制，可粘贴到微信中分享');},function(){fallbackCopy(text);});}else fallbackCopy(text);};
+  window.copyQuote=function(id){var found=findQuote(id),q=found&&found.item;if(!q)return;var text='【'+q.title+'】\n';for(var i=0;i<q.blocks.length;i++){if(!q.blocks[i].text)continue;text+=stripTags(q.blocks[i].text);if(q.blocks[i].source)text+='\n（'+q.blocks[i].source+'）';text+='\n\n';}text+='——晖常语录';if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(function(){alert('已复制，可粘贴到微信中分享');},function(){fallbackCopy(text);});}else fallbackCopy(text);};
   function fallbackCopy(text){var ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');alert('已复制，可粘贴到微信中分享');}catch(e){prompt('请复制：',text);}document.body.removeChild(ta);}
   function roundedPath(ctx,x,y,w,h,r){
     r=Math.min(r,w/2,h/2);ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();
@@ -291,8 +296,8 @@ try{
   function drawLines(ctx,result,x,y,lineHeight){for(var i=0;i<result.lines.length;i++)ctx.fillText(result.lines[i],x,y+i*lineHeight);}
   function posterText(q){
     var parts=[];
-    if(q.blocks&&q.blocks.length){for(var i=0;i<q.blocks.length;i++)if(q.blocks[i]&&q.blocks[i].text)parts.push(q.blocks[i].text);}
-    return parts.length?parts.join('\n\n'):String(q.content||'');
+    if(q.blocks&&q.blocks.length){for(var i=0;i<q.blocks.length;i++)if(q.blocks[i]&&q.blocks[i].text)parts.push(stripTags(q.blocks[i].text));}
+    return parts.length?parts.join('\n\n'):stripTags(q.content);
   }
   function posterFileName(title){return('晖常语录-'+String(title||'分享图')).replace(/[\\/:*?"<>|]/g,'').slice(0,48)+'.png';}
   var posterSaveData=null;
@@ -353,7 +358,7 @@ try{
     var canvas=document.createElement('canvas');canvas.width=1080;
     var ctx=canvas.getContext&&canvas.getContext('2d');if(!ctx)throw new Error('当前浏览器不支持图片生成');
     var navy='#0c2644',navy2='#183c63',gold='#c9a46a',beige='#f7f4ee',ink='#10233c',muted='#6d7a88',cream='#fbf8f1';
-    var title=String(a.title||'未命名文章'),subtitle=trim(a.subtitle),account=trim(a.account)||'汇添富',dateLabel=articleCollectedLabel(a),paragraphs=articleParagraphs(a);
+    var title=stripTags(a.title||'未命名文章'),subtitle=stripTags(trim(a.subtitle)),account=trim(a.account)||'汇添富',dateLabel=articleCollectedLabel(a),paragraphs=articleParagraphs(a).map(function(p){return stripTags(p);});
     var titleFont='700 56px -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif';
     var subtitleFont='400 32px -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif';
     var metaFont='400 24px -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif';
