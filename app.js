@@ -179,8 +179,11 @@ try{
     return'<header class="topbar"><button class="iconbtn" onclick="goBack()">返回</button><div class="topbar-title">'+esc(title)+'</div>'+action+'</header>';
   }
   function updateNoticeHtml(){
-    var message=trim(M.updateNotice||'');
-    return message?'<section class="home-update" aria-label="最新内容更新"><span class="home-update-content"><span class="home-update-head"><span class="home-update-badge">NEW</span><span class="home-update-label">本期更新</span></span><span class="home-update-text">'+esc(message)+'</span></span></section>':'';
+    var message=trim(M.updateNotice||''),source=trim(M.updateNoticeSource||'');
+    if(!message)return'';
+    var linked=source&&quotesBySource(source).length>0;
+    var text=linked?'<a class="home-update-text home-update-link" href="#source/'+esc(sourceKey(source))+'">'+esc(message)+'</a>':'<span class="home-update-text">'+esc(message)+'</span>';
+    return'<section class="home-update" aria-label="最新内容更新"><span class="home-update-content"><span class="home-update-head"><span class="home-update-badge">NEW</span><span class="home-update-label">本期更新</span></span>'+text+'</span></section>';
   }
 
   function homeView(){
