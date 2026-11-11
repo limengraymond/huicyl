@@ -4,6 +4,7 @@ try{
   var Q=D.quotes||[],M=D.meta||{categories:[],count:Q.length},A=(D.articles||[]).slice();
   var SOURCE_YEAR_DATA=window.QUOTE_SOURCE_YEARS||{sources:{}};
   var SOURCE_YEARS=SOURCE_YEAR_DATA.sources||{};
+  var SOURCE_RECORDS={};(D.sources||[]).forEach(function(record){if(record&&record.name)SOURCE_RECORDS[trim(record.name)]=record;});
   var app=document.getElementById('app');
   var state={view:'home',cat:'',id:'',query:'',year:'',source:'',drawer:false};
 
@@ -50,20 +51,23 @@ try{
     }
     return out;
   }
+  function sourceRecord(source){return SOURCE_RECORDS[source]||null;}
+  function sourceCollectedAt(source){var record=sourceRecord(source);if(record&&trim(record.collectedAt))return trim(record.collectedAt);var id=sourceArticleId(source),found=findArticle(id);return found?trim(found.item.collectedAt||found.item.date):'';}
+  function sourceCollectedValue(source){return articleDateValue(sourceCollectedAt(source));}
   function sourceCatalog(){
     var map={},entries,i,j,q,item,entry,priority=(M&&M.sourcePriority)||{};
     for(i=0;i<Q.length;i++){
       q=Q[i];entries=quoteSourceEntries(q);
       for(j=0;j<entries.length;j++){
         entry=entries[j];item=map[entry.name];
-        if(!item)item=map[entry.name]={name:entry.name,year:entry.year||0,quoteIds:{},count:0,firstOrder:Number(q.order)||i+1};
+        if(!item)item=map[entry.name]={name:entry.name,year:Number(sourceRecord(entry.name)&&sourceRecord(entry.name).year)||entry.year||0,quoteIds:{},count:0,firstOrder:Number(q.order)||i+1};
         if(!item.year&&entry.year)item.year=entry.year;
         if(!item.quoteIds[q.id]){item.quoteIds[q.id]=true;item.count++;}
         item.firstOrder=Math.min(item.firstOrder,Number(q.order)||i+1);
       }
     }
     var out=[];for(var key in map)if(Object.prototype.hasOwnProperty.call(map,key))out.push(map[key]);
-    out.sort(function(a,b){var pa=Number(priority[a.name])||9999,pb=Number(priority[b.name])||9999;return b.year-a.year||pa-pb||a.firstOrder-b.firstOrder||a.name.localeCompare(b.name,'zh-CN');});return out;
+    out.sort(function(a,b){var pa=Number(priority[a.name])||9999,pb=Number(priority[b.name])||9999;return b.year-a.year||(sourceCollectedValue(b.name)||0)-(sourceCollectedValue(a.name)||0)||pa-pb||a.firstOrder-b.firstOrder||a.name.localeCompare(b.name,'zh-CN');});return out;
   }
   function quotesBySource(source){
     var out=[];for(var i=0;i<Q.length;i++){var entries=quoteSourceEntries(Q[i]);for(var j=0;j<entries.length;j++)if(entries[j].name===source){out.push(Q[i]);break;}}return out;
@@ -95,6 +99,7 @@ try{
     return'';
   }
   function sourceArticleId(source){
+    var record=sourceRecord(source);if(record&&record.articleId&&findArticle(record.articleId))return record.articleId;
     var list=quotesBySource(source);
     for(var i=0;i<list.length;i++){
       var bs=list[i].blocks||[];
@@ -107,7 +112,7 @@ try{
   function blockSource(block){
     var source=trim(block&&block.source),label=source||'原文链接';
     var summary=source?'<a class="source-summary-link" href="#source/'+esc(sourceKey(source))+'">出处：'+esc(label)+'</a>':'<span>原文链接</span>';
-    var link=articleLinkHtml(block&&block.articleId),url=safeUrl(block&&block.sourceUrl);
+    var link=articleLinkHtml(findArticle(block&&block.articleId)?block.articleId:sourceArticleId(source)),url=safeUrl(block&&block.sourceUrl);
     if(!link&&url)link='<a class="source-link-action" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">查看原文 ↗</a>';
     if(link)return'<div class="source source-link">'+summary+link+'</div>';
     return source?'<div class="source">'+summary+'</div>':'';
@@ -159,9 +164,10 @@ try{
     for(var i=0;i<entries.length;i++)parts.push('<a href="#source/'+esc(sourceKey(entries[i].name))+'">'+hi(entries[i].name,query||'')+'</a>');
     return'<div class="quote-source"><span>出处：</span>'+parts.join('<span class="source-separator">；</span>')+'</div>';
   }
-  function quoteCard(q,query,showCategory){
+  function quoteCard(q,query,showCategory,sourceContext){
     var source=quoteSourceHtml(q,query||'');
     var footer=showCategory?'<div class="quote-meta-row">'+source+'<div class="quote-category" title="收录于“'+esc(q.category)+'”">收录于“'+esc(q.category)+'”</div></div>':source;
+    if(sourceContext){var blocks=q.blocks||[],articleId='';for(var i=0;i<blocks.length;i++)if(trim(blocks[i].source)===sourceContext&&findArticle(blocks[i].articleId)){articleId=blocks[i].articleId;break;}var link=articleLinkHtml(articleId||sourceArticleId(sourceContext));if(link)footer+='<div class="quote-card-actions">'+link+'</div>';}
     return'<article class="quote-card"><button type="button" class="quote-card-main" onclick="location.hash=\'quote/'+q.id+'\'"><h3>'+hi(q.title,query||'')+'</h3><p>'+hi(excerpt(q.content,100),query||'')+'</p></button>'+footer+'</article>';
   }
   function articleCard(a){
@@ -213,7 +219,7 @@ try{
     for(i=maxYear;i>=minYear;i--)if(yearCounts[i])yearButtons+='<button '+(selectedNumber===i?'class="active"':'')+' onclick="location.hash=\'sources/'+i+'\'"><b>'+i+'</b></button>';
     if(hasPending)yearButtons+='<button '+(selected==='pending'?'class="active"':'')+' onclick="location.hash=\'sources/pending\'"><b>待补</b></button>';
     var visible=catalog.filter(function(item){return selected==='pending'?!item.year:item.year===selectedNumber;}),cards='';
-    for(i=0;i<visible.length;i++)cards+='<button class="source-card" onclick="location.hash=\'source/'+esc(sourceKey(visible[i].name))+'\'"><span class="source-card-name">'+esc(visible[i].name)+'</span><span class="source-card-count">'+visible[i].count+' 条语录 <b>›</b></span></button>';
+    for(i=0;i<visible.length;i++){var collected=sourceCollectedAt(visible[i].name);cards+='<button class="source-card" onclick="location.hash=\'source/'+esc(sourceKey(visible[i].name))+'\'"><span class="source-card-name">'+esc(visible[i].name)+'</span><span class="source-card-footer"><span class="source-card-date">'+(collected?'收录时间：'+esc(collected):'收录时间待补')+'</span><span class="source-card-count">'+visible[i].count+' 条语录 <b>›</b></span></span></button>';}
     if(!cards)cards='<div class="source-empty">这一年暂未收录出处</div>';
     var yearLabel=selected==='pending'?'待补年份':selected+' 年';
     return'<main class="shell">'+topbar('按出处分类')+'<section class="section"><div class="section-head"><h2>按出处分类</h2></div><div class="source-browser"><nav class="year-rail" aria-label="出处年份">'+yearButtons+'</nav><div class="source-results"><div class="source-year-head"><h3>'+esc(yearLabel)+'</h3></div><div class="source-card-list">'+cards+'</div></div></div></section></main>'+bottomNav('sources');
@@ -222,7 +228,7 @@ try{
     var source=state.source,list=quotesBySource(source),catalog=sourceCatalog(),item=null,html='';
     for(var i=0;i<catalog.length;i++)if(catalog[i].name===source){item=catalog[i];break;}
     pageTitle(source||'出处汇总');
-    for(i=0;i<list.length;i++)html+=quoteCard(list[i],'',true);
+    for(i=0;i<list.length;i++)html+=quoteCard(list[i],'',true,source);
     if(!html)html='<div class="empty">没有找到这个出处对应的语录<br><a class="text-link" href="#sources">返回按出处分类</a></div>';
     var year=item&&item.year?item.year+' 年':'年份待补';
     var originLink=articleLinkHtml(sourceArticleId(source),'','hero-origin-link');
