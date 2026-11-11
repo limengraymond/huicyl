@@ -164,10 +164,9 @@ try{
     for(var i=0;i<entries.length;i++)parts.push('<a href="#source/'+esc(sourceKey(entries[i].name))+'">'+hi(entries[i].name,query||'')+'</a>');
     return'<div class="quote-source"><span>出处：</span>'+parts.join('<span class="source-separator">；</span>')+'</div>';
   }
-  function quoteCard(q,query,showCategory,sourceContext){
+  function quoteCard(q,query,showCategory){
     var source=quoteSourceHtml(q,query||'');
     var footer=showCategory?'<div class="quote-meta-row">'+source+'<div class="quote-category" title="收录于“'+esc(q.category)+'”">收录于“'+esc(q.category)+'”</div></div>':source;
-    if(sourceContext){var blocks=q.blocks||[],articleId='';for(var i=0;i<blocks.length;i++)if(trim(blocks[i].source)===sourceContext&&findArticle(blocks[i].articleId)){articleId=blocks[i].articleId;break;}var link=articleLinkHtml(articleId||sourceArticleId(sourceContext));if(link)footer+='<div class="quote-card-actions">'+link+'</div>';}
     return'<article class="quote-card"><button type="button" class="quote-card-main" onclick="location.hash=\'quote/'+q.id+'\'"><h3>'+hi(q.title,query||'')+'</h3><p>'+hi(excerpt(q.content,100),query||'')+'</p></button>'+footer+'</article>';
   }
   function articleCard(a){
@@ -228,7 +227,7 @@ try{
     var source=state.source,list=quotesBySource(source),catalog=sourceCatalog(),item=null,html='';
     for(var i=0;i<catalog.length;i++)if(catalog[i].name===source){item=catalog[i];break;}
     pageTitle(source||'出处汇总');
-    for(i=0;i<list.length;i++)html+=quoteCard(list[i],'',true,source);
+    for(i=0;i<list.length;i++)html+=quoteCard(list[i],'',true);
     if(!html)html='<div class="empty">没有找到这个出处对应的语录<br><a class="text-link" href="#sources">返回按出处分类</a></div>';
     var year=item&&item.year?item.year+' 年':'年份待补';
     var originLink=articleLinkHtml(sourceArticleId(source),'','hero-origin-link');
