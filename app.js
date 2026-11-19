@@ -333,33 +333,41 @@ try{
     try{var url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=name;link.style.display='none';document.body.appendChild(link);link.click();document.body.removeChild(link);window.setTimeout(function(){try{URL.revokeObjectURL(url);}catch(e){}},60000);return true;}catch(e){return false;}
   }
   function drawPoster(q){
-    var canvas=document.createElement('canvas');canvas.width=1080;canvas.height=1440;
+    var canvas=document.createElement('canvas');canvas.width=1080;
     var ctx=canvas.getContext&&canvas.getContext('2d');if(!ctx)throw new Error('当前浏览器不支持图片生成');
+    // Measure the complete text before sizing the canvas; resizing clears its drawing state.
+    var titleFont='700 58px -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif';
+    var bodyFont='400 39px -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif';
+    var sourceFont='400 27px -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif';
+    ctx.font=titleFont;var titleResult=canvasLines(ctx,q.title||'未命名语录',862,Infinity),titleY=445;
+    ctx.font=bodyFont;var bodyResult=canvasLines(ctx,posterText(q),820,Infinity);
+    ctx.font=sourceFont;var sourceResult=canvasLines(ctx,'出处：'+sourceLabel(q),830,Infinity);
+    var bodyY=titleY+titleResult.lines.length*76+35;
+    var dividerY=Math.max(1111,bodyY+(bodyResult.lines.length-1)*62+60),sourceY=dividerY+61;
+    var cardBottom=Math.max(1330,sourceY+(sourceResult.lines.length-1)*43+115);
+    canvas.height=cardBottom+110;
     var navy='#0c2644',navy2='#183c63',gold='#c9a46a',beige='#f7f4ee',ink='#10233c',muted='#6d7a88';
     var gradient=ctx.createLinearGradient(0,0,1080,270);gradient.addColorStop(0,navy);gradient.addColorStop(1,navy2);ctx.fillStyle=gradient;ctx.fillRect(0,0,1080,300);
-    ctx.fillStyle=beige;ctx.fillRect(0,260,1080,1180);
+    ctx.fillStyle=beige;ctx.fillRect(0,260,1080,canvas.height-260);
     ctx.save();ctx.globalAlpha=.09;ctx.fillStyle='#ffffff';ctx.beginPath();ctx.arc(930,40,230,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(55,245,140,0,Math.PI*2);ctx.fill();ctx.restore();
 
     ctx.textBaseline='alphabetic';ctx.fillStyle='#ead9bd';ctx.font='400 104px "HuicylCalligraphy","STKaiti","KaiTi",serif';ctx.fillText('晖',78,150);
     var brandX=78+ctx.measureText('晖').width+10;ctx.fillStyle='#ffffff';ctx.font='700 57px "Songti SC","SimSun",serif';ctx.fillText('常语录',brandX,142);
     ctx.fillStyle='#ead9bd';ctx.font='400 27px -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif';ctx.fillText('简单专注 · 内心宁静 · 积极向上',82,215);
 
-    ctx.save();ctx.shadowColor='rgba(9,26,46,.13)';ctx.shadowBlur=34;ctx.shadowOffsetY=14;roundedPath(ctx,60,250,960,1080,34);ctx.fillStyle='#ffffff';ctx.fill();ctx.restore();
+    ctx.save();ctx.shadowColor='rgba(9,26,46,.13)';ctx.shadowBlur=34;ctx.shadowOffsetY=14;roundedPath(ctx,60,250,960,cardBottom-250,34);ctx.fillStyle='#ffffff';ctx.fill();ctx.restore();
     roundedPath(ctx,98,304,Math.min(650,80+String(q.category||'未分类').length*32),58,29);ctx.fillStyle='#f1e7d5';ctx.fill();
     ctx.fillStyle='#9b743f';ctx.font='600 27px -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif';ctx.fillText(String(q.category||'未分类'),124,343);
 
-    ctx.fillStyle=ink;ctx.font='700 58px -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif';
-    var titleResult=canvasLines(ctx,q.title||'未命名语录',862,3),titleY=445;drawLines(ctx,titleResult,105,titleY,76);
-    var bodyY=titleY+titleResult.lines.length*76+35;
+    ctx.fillStyle=ink;ctx.font=titleFont;drawLines(ctx,titleResult,105,titleY,76);
     ctx.fillStyle=gold;ctx.fillRect(105,bodyY-25,6,84);
-    ctx.fillStyle='#34455a';ctx.font='400 39px -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif';
-    var bodyMax=Math.max(3,Math.floor((1065-bodyY)/62)),bodyResult=canvasLines(ctx,posterText(q),820,bodyMax);drawLines(ctx,bodyResult,137,bodyY,62);
+    ctx.fillStyle='#34455a';ctx.font=bodyFont;drawLines(ctx,bodyResult,137,bodyY,62);
 
-    ctx.strokeStyle='#e8e1d5';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(105,1111);ctx.lineTo(975,1111);ctx.stroke();
-    ctx.fillStyle=muted;ctx.font='400 27px -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif';
-    var sourceResult=canvasLines(ctx,'出处：'+sourceLabel(q),830,2);drawLines(ctx,sourceResult,105,1172,43);
-    ctx.textAlign='center';ctx.fillStyle='#7b8793';ctx.font='400 24px -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif';ctx.fillText('简单专注 · 内心宁静 · 积极向上',540,1387);ctx.textAlign='left';
-    return{url:canvas.toDataURL('image/png',1),truncated:titleResult.truncated||bodyResult.truncated||sourceResult.truncated};
+    ctx.strokeStyle='#e8e1d5';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(105,dividerY);ctx.lineTo(975,dividerY);ctx.stroke();
+    ctx.fillStyle=muted;ctx.font=sourceFont;drawLines(ctx,sourceResult,105,sourceY,43);
+    ctx.textAlign='center';ctx.fillStyle='#7b8793';ctx.font='400 24px -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif';ctx.fillText('简单专注 · 内心宁静 · 积极向上',540,canvas.height-53);ctx.textAlign='left';
+    var url=canvas.toDataURL('image/png',1);if(url==='data:,')throw new Error('图片过长，当前浏览器无法生成，请使用电脑浏览器重试。');
+    return{url:url,truncated:false};
   }
 
   function drawArticlePoster(a){
