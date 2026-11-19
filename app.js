@@ -353,7 +353,6 @@ try{
 
     ctx.textBaseline='alphabetic';ctx.fillStyle='#ead9bd';ctx.font='400 104px "HuicylCalligraphy","STKaiti","KaiTi",serif';ctx.fillText('晖',78,150);
     var brandX=78+ctx.measureText('晖').width+10;ctx.fillStyle='#ffffff';ctx.font='700 57px "Songti SC","SimSun",serif';ctx.fillText('常语录',brandX,142);
-    ctx.fillStyle='#ead9bd';ctx.font='400 27px -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif';ctx.fillText('简单专注 · 内心宁静 · 积极向上',82,215);
 
     ctx.save();ctx.shadowColor='rgba(9,26,46,.13)';ctx.shadowBlur=34;ctx.shadowOffsetY=14;roundedPath(ctx,60,250,960,cardBottom-250,34);ctx.fillStyle='#ffffff';ctx.fill();ctx.restore();
     roundedPath(ctx,98,304,Math.min(650,80+String(q.category||'未分类').length*32),58,29);ctx.fillStyle='#f1e7d5';ctx.fill();
@@ -390,7 +389,6 @@ try{
     ctx.textBaseline='alphabetic';
     ctx.fillStyle='#ead9bd';ctx.font='400 84px "HuicylCalligraphy","STKaiti","KaiTi",serif';ctx.fillText('晖',60,120);
     var brandX=60+ctx.measureText('晖').width+12;ctx.fillStyle='#ffffff';ctx.font='700 44px "Songti SC","SimSun",serif';ctx.fillText('常语录',brandX,115);
-    ctx.fillStyle='#ead9bd';ctx.font='400 22px -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif';ctx.fillText('简单专注 · 内心宁静 · 积极向上',60,165);
     ctx.fillStyle=cream;ctx.fillRect(0,headerH,1080,totalH-headerH-footerH);
     var y=headerH+padTop;
     ctx.fillStyle=ink;ctx.font=titleFont;drawLines(ctx,titleResult,60,y,72);y+=titleResult.lines.length*72+30;
