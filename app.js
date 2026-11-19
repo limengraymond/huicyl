@@ -337,8 +337,8 @@ try{
     var ctx=canvas.getContext&&canvas.getContext('2d');if(!ctx)throw new Error('当前浏览器不支持图片生成');
     // Measure the complete text before sizing the canvas; resizing clears its drawing state.
     var titleFont='700 58px -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif';
-    var bodyFont='400 39px -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif';
-    var sourceFont='400 27px -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif';
+    var bodyFont='400 41px -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif';
+    var sourceFont='400 31px -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif';
     ctx.font=titleFont;var titleResult=canvasLines(ctx,q.title||'未命名语录',862,Infinity),titleY=375;
     ctx.font=bodyFont;var bodyResult=canvasLines(ctx,posterText(q),820,Infinity);
     ctx.font=sourceFont;var sourceResult=canvasLines(ctx,'出处：'+sourceLabel(q),830,Infinity);
